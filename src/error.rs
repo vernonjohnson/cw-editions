@@ -27,8 +27,8 @@ pub enum ContractError {
     #[error("WrongPaymentAmount")]
     WrongPaymentAmount {},
 
-    #[error("InvalidTokenReplyID")]
-    InvalidTokenReplyID {},
+    #[error("InvalidTokenReplyId")]
+    InvalidTokenReplyId {},
 
     #[error("Cw721AlreadyLinked")]
     Cw721AlreadyLinked {},

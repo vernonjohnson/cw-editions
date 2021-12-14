@@ -83,7 +83,7 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
     }
 
     if msg.id != INSTANTIATE_TOKEN_REPLY_ID {
-        return Err(ContractError::InvalidTokenReplyID {});
+        return Err(ContractError::InvalidTokenReplyId {});
     }
 
     let reply = parse_reply_instantiate_data(msg).unwrap();
@@ -119,6 +119,7 @@ fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
+    _env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
@@ -356,7 +357,7 @@ mod tests {
         };
 
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
-        let res = execute(deps.as_mut(), info, msg).unwrap();
+        let res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 
         let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
             token_id: String::from("0"),
@@ -416,7 +417,7 @@ mod tests {
         };
         let err = reply(deps.as_mut(), mock_env(), reply_msg).unwrap_err();
         match err {
-            ContractError::InvalidTokenReplyID {} => {}
+            ContractError::InvalidTokenReplyId {} => {}
             e => panic!("unexpected error: {}", e),
         }
     }
@@ -507,8 +508,8 @@ mod tests {
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
 
         // Max mint is 1, so second mint request should fail
-        execute(deps.as_mut(), info.clone(), msg.clone()).unwrap();
-        let err = execute(deps.as_mut(), info, msg).unwrap_err();
+        execute(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        let err = execute(deps.as_mut(), mock_env(), info, msg).unwrap_err();
 
         match err {
             ContractError::SoldOut {} => {}
@@ -543,7 +544,7 @@ mod tests {
         };
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
 
-        let err = execute(deps.as_mut(), info, msg).unwrap_err();
+        let err = execute(deps.as_mut(), mock_env(), info, msg).unwrap_err();
         match err {
             ContractError::Uninitialized {} => {}
             e => panic!("unexpected error: {}", e),
@@ -595,7 +596,7 @@ mod tests {
             amount: Uint128::new(1),
         };
         let info = mock_info("unauthorized-token", &[]);
-        let err = execute(deps.as_mut(), info, msg).unwrap_err();
+        let err = execute(deps.as_mut(), mock_env(), info, msg).unwrap_err();
 
         match err {
             ContractError::UnauthorizedTokenContract {} => {}
@@ -648,7 +649,7 @@ mod tests {
             amount: Uint128::new(100),
         };
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
-        let err = execute(deps.as_mut(), info, msg).unwrap_err();
+        let err = execute(deps.as_mut(), mock_env(), info, msg).unwrap_err();
 
         match err {
             ContractError::WrongPaymentAmount {} => {}
