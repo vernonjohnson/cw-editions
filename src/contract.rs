@@ -42,7 +42,7 @@ pub fn instantiate(
         cw20_address: msg.cw20_address,
         unit_price: msg.unit_price,
         max_tokens: msg.max_tokens,
-        owner: info.sender.clone(),
+        owner: info.sender,
         name: msg.name.clone(),
         symbol: msg.symbol.clone(),
         token_uri: msg.token_uri.clone(),
@@ -57,7 +57,7 @@ pub fn instantiate(
             code_id: msg.token_code_id,
             msg: to_binary(&Cw721InstantiateMsg {
                 name: msg.name.clone(),
-                symbol: msg.symbol.clone(),
+                symbol: msg.symbol,
                 minter: env.contract.address.to_string(),
             })?,
             funds: vec![],
@@ -203,7 +203,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        let res = instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        let res = instantiate(deps.as_mut(), mock_env(), info, msg.clone()).unwrap();
 
         assert_eq!(
             res.messages,
@@ -240,11 +240,11 @@ mod tests {
         let reply_msg = Reply {
             id: INSTANTIATE_TOKEN_REPLY_ID,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
+        reply(deps.as_mut(), mock_env(), reply_msg).unwrap();
 
         let query_msg = QueryMsg::GetConfig {};
         let res = query(deps.as_ref(), mock_env(), query_msg).unwrap();
@@ -282,7 +282,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        let err = instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap_err();
+        let err = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap_err();
 
         match err {
             ContractError::InvalidUnitPrice {} => {}
@@ -306,7 +306,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        let err = instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap_err();
+        let err = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap_err();
 
         match err {
             ContractError::InvalidMaxTokens {} => {}
@@ -330,7 +330,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         let instantiate_reply = MsgInstantiateContractResponse {
             contract_address: "nftcontract".to_string(),
             data: vec![2u8; 32769],
@@ -344,11 +344,11 @@ mod tests {
         let reply_msg = Reply {
             id: INSTANTIATE_TOKEN_REPLY_ID,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
+        reply(deps.as_mut(), mock_env(), reply_msg).unwrap();
 
         let msg = ExecuteMsg::Cw20ReceiveMsg {
             sender: String::from("minter"),
@@ -356,7 +356,7 @@ mod tests {
         };
 
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
-        let res = execute(deps.as_mut(), info.clone(), msg.clone()).unwrap();
+        let res = execute(deps.as_mut(), info, msg).unwrap();
 
         let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
             token_id: String::from("0"),
@@ -372,8 +372,7 @@ mod tests {
                     contract_addr: String::from(MOCK_CONTRACT_ADDR),
                     msg: to_binary(&mint_msg).unwrap(),
                     funds: vec![],
-                })
-                .into(),
+                }),
                 id: 0,
                 gas_limit: None,
                 reply_on: ReplyOn::Never,
@@ -397,7 +396,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         let instantiate_reply = MsgInstantiateContractResponse {
             contract_address: "nftcontract".to_string(),
             data: vec![2u8; 32769],
@@ -411,11 +410,11 @@ mod tests {
         let reply_msg = Reply {
             id: 10,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        let err = reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap_err();
+        let err = reply(deps.as_mut(), mock_env(), reply_msg).unwrap_err();
         match err {
             ContractError::InvalidTokenReplyID {} => {}
             e => panic!("unexpected error: {}", e),
@@ -438,7 +437,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         let instantiate_reply = MsgInstantiateContractResponse {
             contract_address: "nftcontract".to_string(),
             data: vec![2u8; 32769],
@@ -452,13 +451,13 @@ mod tests {
         let reply_msg = Reply {
             id: 1,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
         reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
 
-        let err = reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap_err();
+        let err = reply(deps.as_mut(), mock_env(), reply_msg).unwrap_err();
         match err {
             ContractError::Cw721AlreadyLinked {} => {}
             e => panic!("unexpected error: {}", e),
@@ -481,7 +480,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         let instantiate_reply = MsgInstantiateContractResponse {
             contract_address: "nftcontract".to_string(),
             data: vec![2u8; 32769],
@@ -495,11 +494,11 @@ mod tests {
         let reply_msg = Reply {
             id: INSTANTIATE_TOKEN_REPLY_ID,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
+        reply(deps.as_mut(), mock_env(), reply_msg).unwrap();
 
         let msg = ExecuteMsg::Cw20ReceiveMsg {
             sender: String::from("minter"),
@@ -509,7 +508,7 @@ mod tests {
 
         // Max mint is 1, so second mint request should fail
         execute(deps.as_mut(), info.clone(), msg.clone()).unwrap();
-        let err = execute(deps.as_mut(), info.clone(), msg.clone()).unwrap_err();
+        let err = execute(deps.as_mut(), info, msg).unwrap_err();
 
         match err {
             ContractError::SoldOut {} => {}
@@ -534,7 +533,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
 
         // Test token transfer when nft contract has not been linked
 
@@ -544,7 +543,7 @@ mod tests {
         };
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
 
-        let err = execute(deps.as_mut(), info.clone(), msg.clone()).unwrap_err();
+        let err = execute(deps.as_mut(), info, msg).unwrap_err();
         match err {
             ContractError::Uninitialized {} => {}
             e => panic!("unexpected error: {}", e),
@@ -567,7 +566,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
 
         // Link nft token contract using reply
 
@@ -584,11 +583,11 @@ mod tests {
         let reply_msg = Reply {
             id: INSTANTIATE_TOKEN_REPLY_ID,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
+        reply(deps.as_mut(), mock_env(), reply_msg).unwrap();
 
         // Test token transfer from invalid token contract
         let msg = ExecuteMsg::Cw20ReceiveMsg {
@@ -596,7 +595,7 @@ mod tests {
             amount: Uint128::new(1),
         };
         let info = mock_info("unauthorized-token", &[]);
-        let err = execute(deps.as_mut(), info.clone(), msg.clone()).unwrap_err();
+        let err = execute(deps.as_mut(), info, msg).unwrap_err();
 
         match err {
             ContractError::UnauthorizedTokenContract {} => {}
@@ -620,7 +619,7 @@ mod tests {
         };
 
         let info = mock_info("owner", &[]);
-        instantiate(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
+        instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
 
         // Link nft token contract using reply
 
@@ -637,11 +636,11 @@ mod tests {
         let reply_msg = Reply {
             id: INSTANTIATE_TOKEN_REPLY_ID,
             result: ContractResult::Ok(SubMsgExecutionResponse {
-                events: vec![].into(),
+                events: vec![],
                 data: Some(encoded_instantiate_reply.into()),
             }),
         };
-        reply(deps.as_mut(), mock_env(), reply_msg.clone()).unwrap();
+        reply(deps.as_mut(), mock_env(), reply_msg).unwrap();
 
         // Test token transfer from invalid token contract
         let msg = ExecuteMsg::Cw20ReceiveMsg {
@@ -649,7 +648,7 @@ mod tests {
             amount: Uint128::new(100),
         };
         let info = mock_info(MOCK_CONTRACT_ADDR, &[]);
-        let err = execute(deps.as_mut(), info.clone(), msg.clone()).unwrap_err();
+        let err = execute(deps.as_mut(), info, msg).unwrap_err();
 
         match err {
             ContractError::WrongPaymentAmount {} => {}
