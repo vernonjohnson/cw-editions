@@ -1,4 +1,4 @@
-# CW Stream
+# CW721 Editions
 
 This contract enables the creation of limited edition fixed price NFTs according to the cw721 token standard.
 
